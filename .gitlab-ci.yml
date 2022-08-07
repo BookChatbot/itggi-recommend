@@ -32,7 +32,7 @@ deploy:
     - docker:dind
   script:
     - docker container rm -f recommendation 
-    - docker run -d -p 5000:5000 --name recommendation --restart always -e TZ=Asia/Seoul -e DATABASE_URL=$DATABASE_URL -v /var/log:/app/log -v /var/opt/data:/app/data $IMAGE_NAME
+    - docker run -d --name recommendation --restart always -e TZ=Asia/Seoul -e DATABASE_URL=$DATABASE_URL -v /var/log:/app/log -v /var/opt/data:/app/data $IMAGE_NAME
     - docker ps
   only:
     - main
