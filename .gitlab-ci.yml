@@ -1,0 +1,38 @@
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  IMAGE_NAME: chchdelm3/recommendation:latest
+
+test:
+  stage: test
+  script:
+    - echo "execute test.py"
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u $DOCKER_USER -p $DOCKER_PASSWD
+  script:
+    - docker build -t $IMAGE_NAME .
+    - docker push $IMAGE_NAME
+    - docker images
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker container rm -f recommendation 
+    - docker run -d -p 5000:5000 --name recommendation --restart always -e TZ=Asia/Seoul -e DATABASE_URL=$DATABASE_URL -v /var/log:/app/log -v /var/opt/data:/app/data $IMAGE_NAME
+    - docker ps
+  only:
+    - main
