@@ -9,7 +9,7 @@ from log import info_log, error_log
 while True:
     time.sleep(5)
     now = datetime.now()
-    if now.minute == 30:
+    if now.minute == 30 or now.minute == 0:
         try:
             ratings = pd.read_csv('data/watcha_ratings.csv', encoding='utf-8')
             ratings.dropna(axis=0, inplace=True)
