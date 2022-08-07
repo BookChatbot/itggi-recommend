@@ -260,3 +260,5 @@ cython_debug/
 hangul_stopword.txt
 *.bin
 *.pickle
+/log
+/data
