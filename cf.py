@@ -70,4 +70,4 @@ rating_pred_df = pd.DataFrame(
 rating_pred_df = rating_pred_df.transpose()
 
 # 얻은 결과 저장 -> 추천에 사용
-rating_pred_df.to_csv('data/result_cf.csv', index=False)
+rating_pred_df.to_csv('data/result_cf.csv', index=True)
