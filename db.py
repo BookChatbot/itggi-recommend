@@ -1,12 +1,13 @@
 import sqlalchemy as db
 import pandas as pd
+import os
 
 
 def connect_db():
     """
     db 연결하기
     """
-    DATABASE_URL = 'mysql+pymysql://chatbot:checkitOut-2022@chatbotdb.c3hrvk4wz2vi.ap-northeast-2.rds.amazonaws.com:3306/test_db'
+    DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
     engine = db.create_engine(DATABASE_URL)
     connection = engine.connect()
     metadata = db.MetaData()
