@@ -8,3 +8,5 @@ gensim==3.8.3
 konlpy
 tqdm
 h5py
+mecab-python
+JPype1
