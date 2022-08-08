@@ -4,3 +4,6 @@ numpy
 sklearn
 wheel
 pymysql
+gensim==3.8.3
+konlpy
+tqdm

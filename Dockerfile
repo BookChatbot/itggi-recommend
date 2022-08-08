@@ -11,6 +11,7 @@ WORKDIR /app
 RUN mkdir log
 RUN mkdir data
 RUN pip install pip -U && pip install -r requirements.txt
+RUN curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh
 
 # copy every content from the local file to the image
 COPY . /app
