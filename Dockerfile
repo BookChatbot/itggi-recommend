@@ -19,4 +19,4 @@ COPY . /app
 # configure the container to run in an executed manner
 ENTRYPOINT [ "python3" ]
 
-CMD ["cf.py"]
+CMD ["main.py"]

@@ -10,7 +10,8 @@ if now.hour == 3:
     # Contents Based 추천 시스템
     try:
         books = get_pd_from_table('books')
-        books.drop(['isbn', 'pubDate', 'img', 'rate', 'bestseller'], axis=1, inplace=True)
+        books.drop(['isbn', 'pubDate', 'img', 'rate',
+                   'bestseller'], axis=1, inplace=True)
         books.fillna('', inplace=True)
         # 책 소개 글에 제목,저자,출판사,장르 추가
         summaries = []
@@ -22,15 +23,16 @@ if now.hour == 3:
             summary += book[5]
             summaries.append(summary)
         books['summary'] = summaries
-        books.drop(['title', 'author', 'publisher', 'genre'], axis=1, inplace=True)
+        books.drop(['title', 'author', 'publisher',
+                   'genre'], axis=1, inplace=True)
 
-        cosine_similarity = get_cosine_similarity(books)
+        cosine_similarities = get_cosine_similarity(books)
         info_log('cb 추천 모델을 업데이트 후 저장했습니다.')
 
         # similarity 값이 비어있는 경우만 업데이트
         non_similar_books = books[books['similarity'] == ''].index
         for book_id in non_similar_books:
-            rec_books = recommendations(book_id).id 
+            rec_books = recommendations(books, book_id, cosine_similarities).id
             rec_books = rec_books.to_list()
             rec_books = [str(i) for i in rec_books]
             rec_books = ",".join(rec_books)
