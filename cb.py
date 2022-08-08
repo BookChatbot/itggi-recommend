@@ -4,25 +4,10 @@ from sklearn.metrics.pairwise import cosine_similarity
 from db import get_pd_from_table
 from konlpy.tag import Mecab
 from tqdm import tqdm
+import h5py
 
 
-def get_cosine_similarity():
-    books = get_pd_from_table('books')
-    books.drop(['isbn', 'pubDate', 'img', 'rate', 'bestseller',
-               'similarity'], axis=1, inplace=True)
-
-    # 책 소개 글에 제목,저자,출판사,장르 추가
-    summaries = []
-    for book in books.values:
-        summary = book[1]
-        summary += book[2]
-        summary += book[3]
-        summary += book[4]
-        summary += book[5]
-        summaries.append(summary)
-    books['summary'] = summaries
-    books.drop(['title', 'author', 'publisher', 'genre'], axis=1, inplace=True)
-
+def get_cosine_similarity(books):
     # 불용어 가져오기
     stopwords = []
     with open("data/hangul_stopword.txt", "r") as f:
@@ -60,8 +45,11 @@ def get_cosine_similarity():
     cosine_similarities = cosine_similarity(
         document_embedding_list, document_embedding_list)
 
-    return cosine_similarities, books, word2vec_model
-
+    # save numpy array as h5 file
+    # h5f = h5py.File('data/result_cb.h5', 'w')
+    # h5f.create_dataset('similarity', data=cosine_similarities)
+    # h5f.close()
+    return cosine_similarities
 
 def get_document_vectors(document_list, word2vec_model):
     document_embedding_list = []
