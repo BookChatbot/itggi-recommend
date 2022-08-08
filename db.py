@@ -39,6 +39,14 @@ def get_pd_from_table(table_name):
     return result_set
 
 
+def update_similarity(table_name, book_id, similarity):
+    engine, connection, metadata = connect_db()
+    table = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
+    query = table.update().where(table.columns.id ==
+                                 book_id).values(similarity=similarity)
+    engine.execute(query)
+
+
 if __name__ == '__main__':
     #  table_name = 'books'
     #  books = get_list_from_table(table_name)
