@@ -3,7 +3,7 @@ import datetime
 from pytz import timezone
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                    level=logging.INFO, encoding='utf-8', filename='log/recommendation.log')
+                    level=logging.INFO, filename='log/recommendation.log')
 
 
 def info_log(message):
