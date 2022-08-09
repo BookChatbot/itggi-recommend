@@ -6,7 +6,7 @@ from datetime import datetime
 from db import update_similarity, get_pd_from_table
 
 now = datetime.now()
-if now.hour == 3:
+if now.hour == 4:
     # Contents Based 추천 시스템
     try:
         books = get_pd_from_table('books')
@@ -41,7 +41,7 @@ if now.hour == 3:
         info_log('cb 유사도 업데이트 했습니다.')
     except Exception as e:
         error_log(e)
-else:
+elif now.hour == 2:
     # Collaborative Filtering 추천 시스템
     try:
         # 개인화 평점 계산해서 user-item 데이터셋으로 만들기
