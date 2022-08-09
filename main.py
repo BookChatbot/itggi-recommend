@@ -6,7 +6,7 @@ from datetime import datetime
 from db import update_similarity, get_pd_from_table
 
 now = datetime.now()
-if now.hour == 10:
+if now.hour == 3:
     # Contents Based 추천 시스템
     try:
         books = get_pd_from_table('books')

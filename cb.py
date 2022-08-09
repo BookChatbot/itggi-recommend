@@ -31,7 +31,7 @@ def get_cosine_similarity(books):
     # summary 내용 추가 학습
     word2vec_model = Word2Vec.load('data/ko.bin')
     word2vec_model.wv.save_word2vec_format('data/ko.bin.gz', binary=True)
-    word2vec_model = Word2Vec(size=200, window=5, min_count=2, workers=4)
+    word2vec_model = Word2Vec(size=100, window=5, min_count=2, workers=4)
     word2vec_model.build_vocab(corpus_list)
     word2vec_model.intersect_word2vec_format(
         'data/ko.bin.gz', lockf=1.0, binary=True)
