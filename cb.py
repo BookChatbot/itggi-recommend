@@ -1,7 +1,6 @@
 import pandas as pd
 from gensim.models import Word2Vec
 from sklearn.metrics.pairwise import cosine_similarity
-from db import get_pd_from_table
 from konlpy.tag import Mecab
 from tqdm import tqdm
 import h5py
@@ -32,7 +31,7 @@ def get_cosine_similarity(books):
     # summary 내용 추가 학습
     word2vec_model = Word2Vec.load('data/ko.bin')
     word2vec_model.wv.save_word2vec_format('data/ko.bin.gz', binary=True)
-    word2vec_model = Word2Vec(size=200, window=5, min_count=2, workers=-1)
+    word2vec_model = Word2Vec(size=200, window=5, min_count=2, workers=4)
     word2vec_model.build_vocab(corpus_list)
     word2vec_model.intersect_word2vec_format(
         'data/ko.bin.gz', lockf=1.0, binary=True)
@@ -50,6 +49,7 @@ def get_cosine_similarity(books):
     # h5f.create_dataset('similarity', data=cosine_similarities)
     # h5f.close()
     return cosine_similarities
+
 
 def get_document_vectors(document_list, word2vec_model):
     document_embedding_list = []

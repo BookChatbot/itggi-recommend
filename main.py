@@ -6,7 +6,7 @@ from datetime import datetime
 from db import update_similarity, get_pd_from_table
 
 now = datetime.now()
-if now.hour == 8:
+if now.hour == 10:
     # Contents Based 추천 시스템
     try:
         books = get_pd_from_table('books')
@@ -31,7 +31,8 @@ if now.hour == 8:
 
         # similarity 값이 비어있는 경우만 업데이트
         non_similar_books = books[books['similarity'] == ''].index
-        for book_id in non_similar_books:
+        for index in non_similar_books:
+            book_id = books.loc[index]['id']
             rec_books = recommendations(books, book_id, cosine_similarities).id
             rec_books = rec_books.to_list()
             rec_books = [str(i) for i in rec_books]
