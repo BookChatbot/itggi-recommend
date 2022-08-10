@@ -14,14 +14,15 @@ def connect_db():
     return engine, connection, metadata
 
 
-def get_list_from_table(table_name):
+def get_list_from_table(table_name, user_id):
     """
     table 이름을 입력 받아서 해당 데이터 전부 가져오기
     """
     engine, connection, metadata = connect_db()
     table = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
-    query = db.select([table])
-    #  query = db.select([table]).where(table.columns.id == '1234')
+    # query = db.select([table])
+    query = db.select([table.columns.book_id]).where(
+        table.columns.user_id == user_id)
     result = connection.execute(query)
     result_set = result.fetchall()
     return result_set
@@ -39,11 +40,26 @@ def get_pd_from_table(table_name):
     return result_set
 
 
-def update_similarity(table_name, book_id, similarity):
+def delete_user_similar(table_name, user_id):
+    """
+    user_id 에 해당하는 데이터 전부 삭제
+    """
     engine, connection, metadata = connect_db()
     table = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
-    query = table.update().where(table.columns.id ==
-                                 book_id).values(similarity=similarity)
+    try:
+        query = table.delete().where(table.columns.user_id == user_id)
+        engine.execute(query)
+    except:
+        pass
+
+
+def insert_user_similar(table_name, user_id, book_id):
+    """
+    유저별로 유사도가 높은 책 정보 업데이트
+    """
+    engine, connection, metadata = connect_db()
+    table = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
+    query = table.insert().values(user_id=user_id, book_id=book_id)
     engine.execute(query)
 
 
