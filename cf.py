@@ -5,7 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from log import info_log, error_log
 
 
-def get_similar_by_cf():
+def get_similar_by_cf(users):
     ratings = pd.read_csv('data/watcha_ratings.csv', encoding='utf-8')
     ratings.dropna(axis=0, inplace=True)
 
@@ -15,7 +15,6 @@ def get_similar_by_cf():
     book_list.dropna(axis=0, inplace=True)
 
     # 실제 db에 있는 유저의 최대 id값 가져오기
-    users = get_pd_from_table('users')
     max_user_id = users.id.max()
 
     # 유저 고유 id 부여
