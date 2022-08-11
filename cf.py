@@ -1,14 +1,12 @@
 import pandas as pd
 import numpy as np
-from db import get_pd_from_table
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-def get_similar_by_cf(users):
+def get_similar_by_cf(users, book_list):
     ratings = pd.read_csv('data/watcha_ratings.csv', encoding='utf-8')
     ratings.dropna(axis=0, inplace=True)
 
-    book_list = get_pd_from_table('book_list')
     book_list.drop(['review', 'status', 'created_dt',
                     'modified_dt'], axis=1, inplace=True)
     book_list.dropna(axis=0, inplace=True)

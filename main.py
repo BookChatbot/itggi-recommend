@@ -9,11 +9,12 @@ DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
 engine, connection, metadata = connect_db(DATABASE_URL)
 
 try:
-    print('user 데이터 불러오는 중')
     users = get_pd_from_table('users', engine, connection, metadata)
+    book_list = get_pd_from_table('book_list', engine, connection, metadata)
+    print('데이터 불러오기 완료')
 
     # 개인화 평점 계산해서 user-item 데이터셋으로 만들기
-    item_sim_df, rating_matrix = get_similar_by_cf(users)
+    item_sim_df, rating_matrix = get_similar_by_cf(users, book_list)
     print('유사도 계산 완료')
 
     ratings_pred = predict_rating(rating_matrix.values, item_sim_df.values)
