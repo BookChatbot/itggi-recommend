@@ -1,5 +1,5 @@
 # start by pulling the python image
-FROM python:3.8
+FROM python:3
 
 # copy the requirements file into the image
 COPY ./requirements.txt /app/requirements.txt
@@ -11,7 +11,6 @@ WORKDIR /app
 RUN mkdir log
 RUN mkdir data
 RUN pip install pip -U && pip install -r requirements.txt
-RUN curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh | bash -s
 
 # copy every content from the local file to the image
 COPY . /app
