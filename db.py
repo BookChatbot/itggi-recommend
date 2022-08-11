@@ -1,24 +1,21 @@
 import sqlalchemy as db
 import pandas as pd
-import os
 
 
-def connect_db():
+def connect_db(DATABASE_URL):
     """
     db 연결하기
     """
-    DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
     engine = db.create_engine(DATABASE_URL)
     connection = engine.connect()
     metadata = db.MetaData()
     return engine, connection, metadata
 
 
-def get_list_from_table(table_name, user_id):
+def get_list_from_table(table_name, user_id, engine, connection, metadata):
     """
     table 이름을 입력 받아서 해당 데이터 전부 가져오기
     """
-    engine, connection, metadata = connect_db()
     table = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
     # query = db.select([table])
     query = db.select([table.columns.book_id]).where(
@@ -28,11 +25,10 @@ def get_list_from_table(table_name, user_id):
     return result_set
 
 
-def get_pd_from_table(table_name):
+def get_pd_from_table(table_name, engine, connection, metadata):
     """
     table 이름을 입력 받아서 해당 데이터 dataframe으로 반환
     """
-    engine, connection, metadata = connect_db()
     table = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
     query = db.select([table])
     result_set = pd.read_sql_query(query, connection, index_col=None, coerce_float=True,
@@ -40,11 +36,10 @@ def get_pd_from_table(table_name):
     return result_set
 
 
-def delete_user_similar(table_name, user_id):
+def delete_user_similar(table_name, user_id, engine, metadata):
     """
     user_id 에 해당하는 데이터 전부 삭제
     """
-    engine, connection, metadata = connect_db()
     table = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
     try:
         query = table.delete().where(table.columns.user_id == user_id)
@@ -53,25 +48,31 @@ def delete_user_similar(table_name, user_id):
         pass
 
 
-def insert_user_similar(table_name, user_id, book_id):
+def delete_book_similar(table_name, book_id, engine, metadata):
+    """
+    user_id 에 해당하는 데이터 전부 삭제
+    """
+    table = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
+    try:
+        query = table.delete().where(table.columns.book_id == book_id)
+        engine.execute(query)
+    except:
+        pass
+
+
+def insert_user_similar(table_name, user_id, book_id, engine, metadata):
     """
     유저별로 유사도가 높은 책 정보 업데이트
     """
-    engine, connection, metadata = connect_db()
     table = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
     query = table.insert().values(user_id=user_id, book_id=book_id)
     engine.execute(query)
 
 
-if __name__ == '__main__':
-    #  table_name = 'books'
-    #  books = get_list_from_table(table_name)
-    #  print(books[:5])
-
-    table_name = 'book_list'
-    book_list = get_list_from_table(table_name)
-    print(book_list[:5])
-
-    table_name = 'book_list'
-    book_list = get_pd_from_table(table_name)
-    print(book_list.head())
+def insert_book_similar(table_name, book_id, book_similar_id, engine, metadata):
+    """
+    유저별로 유사도가 높은 책 정보 업데이트
+    """
+    table = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
+    query = table.insert().values(book_id=book_id, book_similar_id=book_similar_id)
+    engine.execute(query)

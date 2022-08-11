@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from db import get_pd_from_table
 from sklearn.metrics.pairwise import cosine_similarity
-from log import info_log, error_log
 
 
 def get_similar_by_cf(users):
