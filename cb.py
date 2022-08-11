@@ -5,7 +5,6 @@ from konlpy.tag import Mecab
 from tqdm import tqdm
 import h5py
 from db import get_pd_from_table
-import zipfile
 
 
 def get_cosine_similarity(books):
@@ -72,24 +71,6 @@ def get_document_vectors(document_list, word2vec_model):
 
     # 각 문서에 대한 문서 벡터 리스트를 리턴
     return document_embedding_list
-
-
-def recommendations(books, book_id, cosine_similarities):
-    # 책의 제목을 입력하면 해당 제목의 인덱스를 리턴받아 idx에 저장.
-    indices = pd.Series(books.index, index=books['id'])
-    idx = indices[book_id]
-
-    # 입력된 책과 줄거리(document embedding)가 유사한 책 10개 선정.
-    sim_scores = list(enumerate(cosine_similarities[idx]))
-    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-    sim_scores = sim_scores[1:11]
-
-    # 가장 유사한 책 10권의 인덱스
-    book_indices = [i[0] for i in sim_scores]
-
-    # 전체 데이터프레임에서 해당 인덱스의 행만 추출. 10개의 행을 가진다.
-    recommend = books.iloc[book_indices].reset_index(drop=True)
-    return recommend
 
 
 if __name__ == '__main__':

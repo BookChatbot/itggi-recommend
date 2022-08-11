@@ -1,4 +1,3 @@
-from cb import recommendations
 from cf import get_similar_by_cf, predict_rating
 from log import info_log, error_log
 import pandas as pd
@@ -49,6 +48,24 @@ try:
     info_log('cf 추천이 업데이트 되었습니다.')
 except Exception as e:
     error_log(e)
+
+
+def recommendations(books, book_id, cosine_similarities):
+    # 책의 제목을 입력하면 해당 제목의 인덱스를 리턴받아 idx에 저장.
+    indices = pd.Series(books.index, index=books['id'])
+    idx = indices[book_id]
+
+    # 입력된 책과 줄거리(document embedding)가 유사한 책 10개 선정.
+    sim_scores = list(enumerate(cosine_similarities[idx]))
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+    sim_scores = sim_scores[1:11]
+
+    # 가장 유사한 책 10권의 인덱스
+    book_indices = [i[0] for i in sim_scores]
+
+    # 전체 데이터프레임에서 해당 인덱스의 행만 추출. 10개의 행을 가진다.
+    recommend = books.iloc[book_indices].reset_index(drop=True)
+    return recommend
 
 
 # Contents Based 추천 시스템
