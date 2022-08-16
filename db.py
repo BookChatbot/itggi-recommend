@@ -25,6 +25,21 @@ def get_list_from_table(table_name, user_id, engine, connection, metadata):
     return result_set
 
 
+def get_not_update_pd_from_table(table_name, table_name2, engine, connection, metadata):
+    """
+    table 이름을 입력 받아서 해당 데이터 dataframe으로 반환
+    """
+    table = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
+    table2 = db.Table(table_name2, metadata,
+                      autoload=True, autoload_with=engine)
+    sub_query = db.select([table2.columns.book_id])
+    query = db.select([table]).where(
+        table.columns.id.not_in(sub_query))
+    result_set = pd.read_sql_query(query, connection, index_col=None, coerce_float=True,
+                                   params=None, parse_dates=None, chunksize=None, dtype=None)
+    return result_set
+
+
 def get_pd_from_table(table_name, engine, connection, metadata):
     """
     table 이름을 입력 받아서 해당 데이터 dataframe으로 반환

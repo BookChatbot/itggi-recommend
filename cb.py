@@ -4,7 +4,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 from konlpy.tag import Mecab
 from tqdm import tqdm
 import h5py
-from db import get_pd_from_table
+from db import get_pd_from_table, connect_db
+import os
 
 
 def get_cosine_similarity(books):
@@ -77,7 +78,10 @@ if __name__ == '__main__':
     # Contents Based 추천 시스템
     try:
         print('books 테이블 불러오는중...')
-        books = get_pd_from_table('books')
+        DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
+        engine, connection, metadata = connect_db(DATABASE_URL)
+
+        books = get_pd_from_table('books', engine, connection, metadata)
         books.drop(['isbn', 'pubDate', 'img', 'rate',
                    'bestseller'], axis=1, inplace=True)
         books.fillna('', inplace=True)
