@@ -52,8 +52,8 @@ def get_movie_data():
 
 #책, 영화 데이터 합치기
 def concat_books_moives(books, movies):
-    books = get_pd_from_table('books', engine, connection, metadata)
-    movies = pd.read_csv('movies', engine, connection, metadata)
+    books = get_book_data()
+    movies = get_movie_data()
     books_movies = pd.concat([books, movies], ignore_index=True)
     books_movies.reset_index(drop=True, inplace=True)
 
@@ -105,3 +105,10 @@ def get_cosine_similarity(books_movies):
         corpus_list, total_examples=word2vec_model.corpus_count, epochs=20)
 
 
+def create_new_movies(search_book_id, books_movies):
+    idx = books_movies[books_movies['id'] < search_book_id].index
+    books_movies = books_movies.drop(idx)
+    idx = books_movies[(books_movies['id'] > search_book_id) & (books_movies['id'] <= max_id)].index
+    books_movies = books_movies.drop(idx)
+    books_movies.reset_index(drop=True, inplace=True)
+    return books_movies
