@@ -5,3 +5,6 @@ sklearn
 wheel
 pymysql
 h5py
+gensim
+konlpy
+tqdm
