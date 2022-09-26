@@ -2,6 +2,7 @@ from cf import get_similar_by_cf, predict_rating
 from log import info_log, error_log
 import pandas as pd
 from db import delete_user_similar, get_pd_from_table, insert_user_similar, get_list_from_table, delete_book_similar, insert_book_similar, connect_db, get_not_update_pd_from_table
+from movie_cb import get_book_data, get_movie_data, concat_books_moives
 import h5py
 import os
 
@@ -76,6 +77,7 @@ def recommendations(books, book_id, cosine_similarities):
 
 
 # Contents Based 추천 시스템
+#책
 try:
     # 책 전체 불러오기
     print('books 테이블 불러오는 중...')
@@ -112,5 +114,57 @@ try:
         print(f'기준 책: {book_id}, 유사 책: {rec_books}')
     print('추천 책 업데이트를 완료했습니다.')
     info_log('cb 유사도 업데이트 했습니다.')
+except Exception as e:
+    error_log(e)
+
+
+#영화
+try:
+    #책 전체 불러오기
+    print('books 테이블 불러오는 중...')
+    books = get_book_data()
+    print(books.head())
+
+    #영화 불러오기
+    print('books 테이블 불러오는 중...')
+    movies = get_movie_data()
+    print(movies.head())
+
+    #책, 영화 데이터 합치기
+    print('books, movie 테이블 합치는 중...')
+    books_movies = concat_books_moives()
+    print(books_movies.head())
+
+
+    # 유사도가 없는 영화만 불러오기
+    print('유사도 없는 영화들만 불러오기...')
+    non_movies = get_not_update_pd_from_table(
+        'movies', 'movie_similar', engine, connection, metadata)
+    non_movies = non_movies['id']
+    print(type(non_movies), len(non_movies))
+
+    # load numpy array from h5 file
+    h5f = h5py.File('data/result_cb.h5', 'r')
+    cosine_similarities = h5f['similarity'][:]
+    h5f.close()
+    print('저장된 유사도 모델 h5 불러오기 완료')
+
+    # books 테이블의 책을 한 권씩 가져와 유사도 높은 책(영화) 뽑아내기
+    for book_id in non_movies:
+        delete_book_similar('movie_similar', book_id, engine, metadata)
+        print(f'{book_id}에 해당하는 기존 추천 책들 삭제 완료')
+
+        rec_books = recommendations(books_movies, book_id, cosine_similarities).id
+        rec_books = rec_books.to_list()
+
+        # 추천 받은 책들 book_similar_id(movie_similar_id) 테이블에 업데이트
+        for movie_similar_id in rec_books:
+            insert_movie_similar('movie_similar', book_id,
+                                movie_similar_id, engine, metadata)
+        print(f'기준 책: {book_id}, 유사 책: {rec_books}')
+    print('추천 책(영화) 업데이트를 완료했습니다.')
+    info_log('cb 유사도 업데이트 했습니다.')
+
+
 except Exception as e:
     error_log(e)
