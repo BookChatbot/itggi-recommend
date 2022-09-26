@@ -1,10 +1,10 @@
 from cf import get_similar_by_cf, predict_rating
 from log import info_log, error_log
 import pandas as pd
-from db import delete_user_similar, get_pd_from_table, insert_user_similar, get_list_from_table, delete_book_similar, insert_book_similar, connect_db, get_not_update_pd_from_table
+from db import delete_user_similar, get_pd_from_table, insert_user_similar, insert_movie_similar, get_list_from_table, delete_book_similar, insert_book_similar, connect_db, get_not_update_pd_from_table
 import h5py
 import os
-from movie_cb import get_book_data, get_movie_data, concat_books_moives
+from movie_cb import get_book_data, get_movie_data, concat_books_moives, rearrange_movie_id, create_new_movies
 
 DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
 engine, connection, metadata = connect_db(DATABASE_URL)
@@ -44,13 +44,15 @@ try:
     books_movies = concat_books_moives()
     print(books_movies.head())
 
+    #영화 인덱스 재설정
+    max_id, movies_id = rearrange_movie_id()
 
     # 유사도가 없는 영화만 불러오기
     print('유사도 없는 영화들만 불러오기...')
-    non_books = get_not_update_pd_from_table(
+    non_movies = get_not_update_pd_from_table(
         'movies', 'movie_similar', engine, connection, metadata)
-    non_books = non_books['id']
-    print(type(non_books), len(non_books))
+    non_movies = non_movies['id']
+    print(type(non_movies), len(non_movies))
 
     # load numpy array from h5 file
     h5f = h5py.File('data/result_cb.h5', 'r')
@@ -58,22 +60,41 @@ try:
     h5f.close()
     print('저장된 유사도 모델 h5 불러오기 완료')
 
-    # books 테이블의 책을 한 권씩 가져와 유사도 높은 책(영화) 뽑아내기
-    for book_id in non_books:
-        delete_book_similar('movie_similar', book_id, engine, metadata)
-        print(f'{book_id}에 해당하는 기존 추천 책들 삭제 완료')
+    # # books 테이블의 책을 한 권씩 가져와 유사도 높은 책(영화) 뽑아내기
+    # for book_id in non_movies:
+    #     delete_book_similar('movie_similar', book_id, engine, metadata)
+    #     print(f'{book_id}에 해당하는 기존 추천 책들 삭제 완료')
 
-        rec_books = recommendations(books_movies, book_id, cosine_similarities).id
-        rec_books = rec_books.to_list()
+    #     rec_books = recommendations(books_movies, book_id, cosine_similarities).id
+    #     rec_books = rec_books.to_list()
 
-        # 추천 받은 책들 book_similar_id(movie_similar_id) 테이블에 업데이트
-        for book_similar_id in rec_books:
-            insert_book_similar('movie_similar', book_id,
-                                book_similar_id, engine, metadata)
-        print(f'기준 책: {book_id}, 유사 책: {rec_books}')
+    #     # 추천 받은 책들 book_similar_id(movie_similar_id) 테이블에 업데이트
+    #     for movie_similar_id in rec_books:
+    #         insert_movie_similar('movie_similar', book_id,
+    #                             movie_similar_id, engine, metadata)
+    #     print(f'기준 책: {book_id}, 유사 책: {rec_books}')
+
+
+#윗부분처럼 함수 활용하여 바꿔보기
+    for search_book_id in books_movies['id']:
+    # 검색할 책 한 권만 포함한 table
+        n_books_movies = create_new_movies(search_book_id, books_movies)
+
+        document_embedding_list = get_document_vectors(
+            n_books_movies['summary'], word2vec_model)
+        
+        cosine_similarities = cosine_similarity(
+            document_embedding_list, document_embedding_list)
+        
+        rec_movies = recommendations(n_books_movies, search_book_id, cosine_similarities).id
+        rec_movies = rec_movies.to_list()
+        rec_movies = [x-max_id for x in rec_movies]
+
+    print(f'현재 책: {search_book_id} 유사한 영화: {rec_movies}')
     print('추천 책(영화) 업데이트를 완료했습니다.')
     info_log('cb 유사도 업데이트 했습니다.')
 
 
 except Exception as e:
     error_log(e)
+
