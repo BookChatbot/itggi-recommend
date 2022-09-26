@@ -15,7 +15,6 @@ engine, connection, metadata = connect_db(DATABASE_URL)
 
 #책 데이터 가져오는 함수
 def get_book_data():
-    #books = pd.read_csv('data/books.csv')
     books = get_pd_from_table('books', engine, connection, metadata)
     books.drop(['Unnamed: 0', 'sense'], inplace=True, axis=1)
     books.fillna('', inplace=True)
@@ -36,7 +35,6 @@ def get_book_data():
 
 #영화 데이터 가져오는 함수
 def get_movie_data():
-    #movies = pd.read_csv('data/movies.csv')
     movies = get_pd_from_table('movies', engine, connection, metadata)
     movies.drop(['Unnamed: 0', 'openYear', 'n_code', 'nation', 'runningTime', 'age', 'openDate', 'rate', 'participate', 'directors', 'actors', 'blank', 'img', 'genre'], inplace=True, axis=1)
     movies.dropna(axis=0, inplace=True)
