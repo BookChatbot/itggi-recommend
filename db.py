@@ -86,8 +86,17 @@ def insert_user_similar(table_name, user_id, book_id, engine, metadata):
 
 def insert_book_similar(table_name, book_id, book_similar_id, engine, metadata):
     """
-    유저별로 유사도가 높은 책 정보 업데이트
+    책별 유사도가 높은 책 정보 업데이트
     """
     table = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
     query = table.insert().values(book_id=book_id, book_similar_id=book_similar_id)
+    engine.execute(query)
+
+
+def insert_movie_similar(table_name, book_id, movie_similar_id, engine, metadata):
+    """
+    책과 유사한 영화 정보 업데이트
+    """
+    table = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
+    query = table.insert().values(book_id=book_id, movie_similar_id=movie_similar_id)
     engine.execute(query)
