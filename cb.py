@@ -3,9 +3,9 @@ from gensim.models import Word2Vec
 from sklearn.metrics.pairwise import cosine_similarity
 from konlpy.tag import Mecab
 from tqdm import tqdm
-import h5py
-from db import get_pd_from_table, connect_db, insert_movie_similar
+from db import get_pd_from_table, connect_db, insert_movie_similar, get_not_update_pd_from_table, delete_book_similar, insert_book_similar
 import os
+from log import info_log, error_log
 
 
 def get_word2vec_model(books):
@@ -130,22 +130,42 @@ if __name__ == '__main__':
             document_embedding_list, document_embedding_list)
         print('내용 기반 유사도 모델 학습 완료')
 
-        # save numpy array as h5 file
-        h5f = h5py.File('data/result_cb.h5', 'w')
-        h5f.create_dataset('similarity', data=cosine_similarities)
-        h5f.close()
-        print('유사도 모델 h5형식으로 저장 완료')
+        # 유사도가 없는 신간 책만 불러오기
+        print('유사도 없는 책들만 불러오기...')
+        non_books = get_not_update_pd_from_table(
+            'books', 'book_similar', engine, connection, metadata)
+        non_books = non_books['id']
+        print(type(non_books), len(non_books))
 
+        # books 테이블의 책을 한 권씩 가져와 유사도 높은 책 뽑아내기
+        for book_id in non_books:
+            delete_book_similar('book_similar', book_id, engine, metadata)
+            print(f'{book_id}에 해당하는 기존 추천 책들 삭제 완료')
+
+            rec_books = recommendations(books, book_id, cosine_similarities).id
+            rec_books = rec_books.to_list()
+
+            # 추천 받은 책들 book_similar_id 테이블에 업데이트
+            for book_similar_id in rec_books:
+                insert_book_similar('book_similar', book_id,
+                                    book_similar_id, engine, metadata)
+            print(f'기준 책: {book_id}, 유사 책: {rec_books}')
+        print('추천 책 업데이트를 완료했습니다.')
+        info_log('cb 유사도 업데이트 했습니다.')
     except Exception as e:
         print(e)
 
     # Movie 추천 시스템
     try:
-        print('books 테이블 불러오는중...')
         DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
         engine, connection, metadata = connect_db(DATABASE_URL)
 
-        books = get_pd_from_table('books', engine, connection, metadata)
+        # 유사도가 없는 신간 책만 불러오기
+        print('유사도 없는 책들만 불러오기...')
+        books = get_not_update_pd_from_table(
+            'books', 'movie_similar', engine, connection, metadata)
+        print(books.head(), len(books))
+
         books.drop(['isbn', 'pubDate', 'img', 'rate',
                    'bestseller'], axis=1, inplace=True)
         books.fillna('', inplace=True)
@@ -214,4 +234,5 @@ if __name__ == '__main__':
                     'movie_similar', search_book_id, movie_id, engine, metadata)
 
     except Exception as e:
+        error_log(e)
         print(e)
