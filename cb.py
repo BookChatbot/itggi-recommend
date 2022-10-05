@@ -215,6 +215,10 @@ if __name__ == '__main__':
 
         # 책 전체에 대해서 작업 수행
         for search_book_id in books_movies['id']:
+
+            if search_book_id == max_id + 1:
+                break
+
             # 검색할 책 한 권만 포함한 table
             n_books_movies = create_new_movies(search_book_id, books_movies)
             document_embedding_list = get_document_vectors(
